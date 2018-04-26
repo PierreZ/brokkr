@@ -1,4 +1,4 @@
-# brokkr
+# brokkr [![Build Status](https://travis-ci.org/PierreZ/brokkr.svg?branch=master)](https://travis-ci.org/PierreZ/brokkr)
 
 Generate KVM images from Docker images
 
