@@ -1,0 +1,11 @@
+FROM debian:9
+
+RUN apt update
+
+RUN   echo "# <file system>        <dir>         <type>    <options>             <dump> <pass>" >> /etc/fstab
+RUN   echo "/dev/sda1              /             ext4      defaults              1      1" >> /etc/fstab
+
+ENV DEBIAN_FRONTEND noninteractive
+
+# This will trigger the creation of an initramfs too
+RUN apt install -y linux-image-4.9.0-6-amd64

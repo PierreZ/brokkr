@@ -1,6 +1,6 @@
 # brokkr [![Build Status](https://travis-ci.org/PierreZ/brokkr.svg?branch=master)](https://travis-ci.org/PierreZ/brokkr)
 
-Generate KVM images from Docker images
+Experiment to generate ISO/KVM images from Docker images
 
 ## Why
 
@@ -27,21 +27,24 @@ From [Wikipedia](https://en.wikipedia.org/wiki/Brokkr):
 
 > In Norse mythology, Brokkr (Old Norse "the one who works with metal fragments; blacksmith", anglicized Brokk) is a dwarf, and the brother of Eitri or Sindri.
 
+## Requirements
+
+* genisoimage (cdrtools package for Arch)
+* Docker daemon with experimental features, see [here](https://stackoverflow.com/a/46565552)
+
 ## How-to
 
 ```bash
-docker pull debian:9
-docker save -o /tmp/debian.tar debian:9
+# Let's build our debian 9
+docker build --squash -t my-debian9 -f ./Dockerfile.debian9.example .
+
+# Export OCI image
+docker save -o /tmp/debian.tar my-debian9:latest
 brokkr /tmp/debian.tar
 ```
 
 ## Todo
 
-- [x] Decompress, find and squash the layers
-- [ ] Handle multiple layers ([tar-rs](https://github.com/alexcrichton/tar-rs) seems to panic when files already exists...)
-- [ ] Install what is missing for a bootable image:
-  - [ ] initramfs
-  - [ ] Kernel
-  - [ ] SystemD
-  - [ ] ?
-- [ ] Generate image ([hint?](https://askubuntu.com/a/165630))
+* [x] Decompress, find and squash the layers
+* [x] Generate image
+* [ ] Make it work! Stuck on: 'no boot medium found' on virtualbox
