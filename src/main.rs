@@ -10,6 +10,7 @@ extern crate serde_derive;
 
 use std::path::PathBuf;
 use structopt::StructOpt;
+use tempdir::TempDir;
 
 mod docker;
 
@@ -23,5 +24,12 @@ struct Opt {
 
 fn main() {
     let opt = Opt::from_args();
-    println!("{:?}", docker::decompress_and_squash(opt.archive));
+
+    let tmp_rootfs = TempDir::new("rootfs").expect("Cannot create a temporary dir");
+    let tmp_rootfs_path = PathBuf::from(tmp_rootfs.path());
+
+    println!(
+        "{:?}",
+        docker::decompress_and_squash(opt.archive, tmp_rootfs_path)
+    );
 }

@@ -6,7 +6,12 @@ use std::path::PathBuf;
 use tar::Archive;
 use tempdir::TempDir;
 
-pub fn decompress_and_squash(docker_archive_path: PathBuf) -> Result<(), io::Error> {
+/// Create a temporary folder, decompress the docker image in it,
+/// and then squash the layers into a single rootfs in the root_dir_path
+pub fn decompress_and_squash(
+    docker_archive_path: PathBuf,
+    root_dir_path: PathBuf,
+) -> Result<(), io::Error> {
     println!("Decompressing the image...");
 
     let docker_archive_file = File::open(docker_archive_path)?;
@@ -20,10 +25,11 @@ pub fn decompress_and_squash(docker_archive_path: PathBuf) -> Result<(), io::Err
         tmp_archive_dir.path().join("manifest.json"),
         PathBuf::from(tmp_archive_dir.path()),
     )?;
-    println!("{:?}", layers);
 
-    let root_dir = TempDir::new("rootfs")?;
-    squash_layers(layers, root_dir.path().to_path_buf())?;
+    squash_layers(layers, root_dir_path)?;
+
+    // Cleaning up
+    tmp_archive_dir.close()?;
 
     Ok(())
 }
@@ -63,12 +69,14 @@ fn get_layers_from_manifest(
 }
 
 fn squash_layers(layers: Vec<PathBuf>, root_dir: PathBuf) -> Result<(), io::Error> {
-    println!("Squashing the layers...");
+    println!("Found {} layers, squashing them...", layers.len());
 
     for layer_path in layers.iter() {
         let layer_file = File::open(layer_path)?;
         let mut layer = Archive::new(layer_file);
         layer.unpack(&root_dir)?;
     }
+    println!("Squashing done!");
+
     Ok(())
 }
