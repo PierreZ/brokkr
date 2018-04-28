@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io;
 use std::io::Read;
 use std::path::PathBuf;
+
 use tar::Archive;
 use tempdir::TempDir;
 
@@ -10,7 +11,7 @@ use tempdir::TempDir;
 /// and then squash the layers into a single rootfs in the root_dir_path
 pub fn decompress_and_squash(
     docker_archive_path: PathBuf,
-    root_dir_path: PathBuf,
+    root_dir_path: &PathBuf,
 ) -> Result<(), io::Error> {
     println!("Decompressing the image...");
 
@@ -23,10 +24,10 @@ pub fn decompress_and_squash(
 
     let layers = get_layers_from_manifest(
         tmp_archive_dir.path().join("manifest.json"),
-        PathBuf::from(tmp_archive_dir.path()),
+        &PathBuf::from(tmp_archive_dir.path()),
     )?;
 
-    squash_layers(layers, root_dir_path)?;
+    squash_layers(layers, root_dir_path.to_path_buf())?;
 
     // Cleaning up
     tmp_archive_dir.close()?;
@@ -46,7 +47,7 @@ struct Layer {
 
 fn get_layers_from_manifest(
     manifest_path: PathBuf,
-    tmp_path: PathBuf,
+    tmp_path: &PathBuf,
 ) -> Result<(Vec<PathBuf>), io::Error> {
     let mut f = File::open(manifest_path)?;
     let mut contents = String::new();

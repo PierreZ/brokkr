@@ -9,6 +9,7 @@ extern crate structopt;
 extern crate serde_derive;
 
 use std::path::PathBuf;
+use std::process::Command;
 use structopt::StructOpt;
 use tempdir::TempDir;
 
@@ -28,8 +29,14 @@ fn main() {
     let tmp_rootfs = TempDir::new("rootfs").expect("Cannot create a temporary dir");
     let tmp_rootfs_path = PathBuf::from(tmp_rootfs.path());
 
-    println!(
-        "{:?}",
-        docker::decompress_and_squash(opt.archive, tmp_rootfs_path)
-    );
+    docker::decompress_and_squash(opt.archive, &tmp_rootfs_path)
+        .expect("Cannot decompress docker image");
+
+    println!("Creating ISO image...");
+    Command::new("genisoimage")
+        .arg("-o")
+        .arg("/tmp/output_image.iso")
+        .arg(tmp_rootfs_path.to_str().unwrap())
+        .output()
+        .expect("failed to execute process");
 }
